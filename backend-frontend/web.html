@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+ 
+<html lang="en">
+ 
+<head>
+ 
+    <meta charset="UTF-8">
+ 
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+ 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script> 
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+
+    <title>WebSocker Client</title>
+ 
+</head>
+ 
+
+
+
+<script type="text/javascript" src="smoothie.js"></script>
+<script type="text/javascript" src="gauge.js"></script>
+
+<script>
+ 
+const socket = new WebSocket('ws://localhost:8000');
+ 
+socket.addEventListener('open', function (event) {
+    socket.send('Connection Established');
+});
+
+
+
+$(document).ready(function(){
+    var gauge_l = new Gauge({
+			renderTo    : 'speedometer_l',
+			width       : 200,
+			height      : 200,
+			glow        : true,
+			units       : '',
+			title       : 'Speed',
+			minValue    : 0,
+			maxValue    : 90,
+			majorTicks  : ['0','20','40','60','80','100'],
+			minorTicks  : 2,
+			strokeTicks : false,
+			/*highlights  : [
+				{ from : 0,   to : 100, color : 'rgba(0,   255, 0, .15)' },
+				{ from : 100, to : 160, color : 'rgba(255, 255, 0, .15)' },
+				{ from : 160, to : 220, color : 'rgba(255, 30,  0, .25)' }
+			],*/
+			highlights : false,
+			colors      : {
+				plate      : '#222',
+				majorTicks : '#f5f5f5',
+				minorTicks : '#ddd',
+				title      : '#fff',
+				units      : '#ccc',
+				numbers    : '#eee',
+				needle     : { start : 'rgba(240, 128, 128, 1)', end : 'rgba(255, 160, 122, .9)' }
+			}
+
+		});
+gauge_l.draw();
+
+setInterval(function(){ 
+    socket.send("update");
+}, 100);
+ 
+ 
+socket.addEventListener('message', function (event) {
+
+    console.log(event.data);
+    data = JSON.parse(event.data);
+    //const size = 5
+    //var el = document.getElementById('image');
+
+    //while ( el.firstChild ) el.removeChild( el.firstChild );
+
+    
+    for(var i = 0; i < data.length; i++) {
+        console.log("debug: " + data[i][0] + "\n")
+        if(data[i][0] == 'ego-0.0') {
+            gauge_l.setValue( data[i][1]['speed']);
+            $("#info").html(data[i][1]['infoReceived'] ? "Yes" : "No")
+            $("#status").html(data[i][1]['status'] ? '<span style="color: green; font-style: bold">Free</span>' : '<span style="color: red">Busy</span>')
+            $("#lastUpdate").html(data[i][1]['lastUpdateTime'] + " s")
+            $("#parked").html(data[i][1]['parked'] ? '<span style="color: green; font-style: bold">Yes!</span>': 'Not yet')
+            if(data[i][1]['parked']) {
+                $("#parkingdemand").html('Succesfull parked!');
+                $("#parkingdemand").css('color', 'green');
+                $("#parkingdemand").css('border', '2px solid green');
+            }
+            
+        }
+
+        //console.log(data[i][1]['position']);
+        //const ctx = canvas.getContext("2d");
+        
+        /*var x = data[i][1]['position'][0] / 2 - el.offsetLeft;
+        console.log("x: " + data[i][1]['position'] + "\n")
+        console.log("y: " + data[i][1]['position'][1] + "\n")
+        var y = data[i][1]['position'][1] / 2 - el.offsetTop;
+        el.append(`<div style="width: ${size}px; height: ${size}px; background: black; position: absolute; top: ${y + size}px; left: ${x + size}px; border-radius: ${size}px"/>`);
+        */
+        //ctx.rect(data[i][1]['position'][0], data[i][1]['position'][1], 10, 10);
+        //ctx.fill();
+    }
+
+ 
+});
+
+});
+
+
+ 
+const contactServer = () => {
+    console.log("sending...")
+    socket.send("Foobar");
+ 
+}
+ 
+</script>
+<body style="font-family: Sans-serif;">
+    <div style="width: 400px; margin: 50px; border: 4px solid rgb(201, 201, 201); border-radius: 5px; padding: 20px; padding-left: 50px; background-color: #F8F8F8;">
+    <h2 style="margin-left: 130px;">Parkfinder</h2>
+    <img style="margin-left: 80px; " src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Parking_icon.svg/2048px-Parking_icon.svg.png" width="50px" height="50px" /><button id="parkingdemand" style="vertical-align:top; margin-top: 0px; margin-left: 20px; padding: 10px; font-size: larger" onclick="contactServer()">I want to park!</button>
+    <!--<img id="image" src="background.png"/>-->
+<div id="column" >
+<p><table>
+	<tr><th align="center"></th><th align="center"></th></tr>
+	<tr>
+	<th><canvas id="speedometer_l"></canvas></th>
+	<th><table>
+		<tr><th>Info received:</th><th><span id="info"> - </span></th></tr>
+		<tr><th>Status:</th><th><span id="status"> - </span></th></tr>
+		<tr><th>last Update:</th><th><span id="lastUpdate"> - </span></th></tr>
+		<tr><th>Parked?</th><th><span id="parked"> - </span></th></tr>
+		</table>
+		</th>
+	</tr></table>
+	</p>
+    </div>
+</div>
+</body>
+</html>

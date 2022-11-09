@@ -1,0 +1,257 @@
+<!--HTML Seite, die das Video und saemtliche Zustandsdaten des Raspberry Pi anzeigt-->
+
+<!DOCTYPE HTML>
+<html>
+  <head>
+	<title>IKT CAR MONITORING</title>
+	<style>
+		body {
+			background: #555;
+			text-align: left;
+			margin-top: 1%;
+			zoom: 100%;
+
+		}
+		p    {color:white;max-width: 50%;}
+		th    {color:white;}
+		#column {
+
+		width: 50%; /* plan width = 180 + 20 + 20 + 1 + 1 = 222px */
+		float: left;
+
+		position: relative;
+	}
+	</style>
+
+  </head>
+  <body onload="SetFrameSrc()">
+
+	<script type="text/javascript" src="smoothie.js"></script>
+	<script type="text/javascript" src="gauge.js"></script>
+
+	<!--Zeichenflächen für Daten-->
+
+    <div id="column" >
+
+	<p><table>
+	<tr><th align="center">Speed left:</th><th align="center">Speed right:</th><th align="center">Infrared:</th></tr>
+	<tr>
+	<th><canvas id="speedometer_l"></canvas></th>
+	<th><canvas id="speedometer_r"></canvas></th>
+	<th><table>
+		<tr><th>Distance:</th><th><span id="ir1">-1</span></th></tr>
+		<tr><th>Treshold:</th><th>&nbsp&nbsp&nbsp<img id="infrared" src="" width=50></th></tr>
+		<tr><th>ParkingLot:</th><th><span id="parkinglot">-1</span></th></tr>
+		<tr><th>ParkingTime:</th><th><span id="parkingtime">-1</span></th></tr>
+		<tr><th>ParkingDistance:</th><th><span id="parkingdistance">-1</span></th></tr>
+		</table>
+		</th>
+	</tr></table>
+	</p>
+	<p><input type="button" value="StartParking" onclick="dataSocket.send('StartParking')"><input type="button" value="StopParking" onclick="dataSocket.send('StopParking')"></p>
+    <p>Compass: <span id="Compass">-1</span>°</p>
+    <canvas class="canvas" id="compass_Chart" width="400" height="100"></canvas>
+    <p>Range front: <span id="range_f">-1</span> cm</p>
+	<p>Range rear: <span id="range_r">-1</span> cm</p>
+    <canvas class="canvas" id="range_Chart" width="400" height="100"></canvas>
+
+	<!--<p>Speed left: <span id="speed_l">-1</span> </p>
+	<p>Speed right: <span id="speed_r">-1</span> </p>
+    <canvas class="canvas" id="speed_Chart" width="400" height="100"></canvas>-->
+
+	<p>Total distance left: <span id="distance_l">-1</span> cm</p>
+	<p>Total distance right: <span id="distance_r">-1</span> cm</p>
+    <canvas class="canvas" id="distance_Chart" width="400" height="100"></canvas>
+
+	<div id="console"></div>
+
+
+	</div>
+
+
+	<div id="column" align="left">
+	<!--
+    <p align="center">Picture <input type="button" value="TakePicture" onclick="dataSocket.send('TakePicture')"></p>
+	<span id="reload"></span>
+	<img id="image" src="image.jpg" alt="image" width="600" height="400">
+	<p align="center">Video Stream <input type="button" value="StartVideo" onclick="dataSocket.send('StartVideo')">
+
+	<input type="button" value="StopVideo" onclick="dataSocket.send('StopVideo')"></p>
+	-->
+
+    <iframe id="myFrame" src="" width="1095" height="735" scrolling="no" ></iframe>
+	<input type="button" onclick="window.open('http://'+window.location.hostname+':8080', 'Zweitfenster')" value="config" />
+	</div>
+
+	<script>
+		function SetFrameSrc() {
+			document.getElementById("myFrame").src = "http://"+window.location.hostname+":8080/stream";
+		}
+	</script>
+
+
+	<script>
+		var gauge_l = new Gauge({
+			renderTo    : 'speedometer_l',
+			width       : 200,
+			height      : 200,
+			glow        : true,
+			units       : '',
+			title       : 'Speed left',
+			minValue    : 0,
+			maxValue    : 700,
+			majorTicks  : ['0','100','200','300','400','500','600','700'],
+			minorTicks  : 2,
+			strokeTicks : false,
+			/*highlights  : [
+				{ from : 0,   to : 100, color : 'rgba(0,   255, 0, .15)' },
+				{ from : 100, to : 160, color : 'rgba(255, 255, 0, .15)' },
+				{ from : 160, to : 220, color : 'rgba(255, 30,  0, .25)' }
+			],*/
+			highlights : false,
+			colors      : {
+				plate      : '#222',
+				majorTicks : '#f5f5f5',
+				minorTicks : '#ddd',
+				title      : '#fff',
+				units      : '#ccc',
+				numbers    : '#eee',
+				needle     : { start : 'rgba(240, 128, 128, 1)', end : 'rgba(255, 160, 122, .9)' }
+			}
+		});
+
+		var gauge_r = new Gauge({
+			renderTo    : 'speedometer_r',
+			width       : 200,
+			height      : 200,
+			glow        : true,
+			units       : '',
+			title       : 'Speed right',
+			minValue    : 0,
+			maxValue    : 700,
+			majorTicks  : ['0','100','200','300','400','500','600','700'],
+			minorTicks  : 2,
+			strokeTicks : false,
+			/*highlights  : [
+				{ from : 0,   to : 100, color : 'rgba(0,   255, 0, .15)' },
+				{ from : 100, to : 160, color : 'rgba(255, 255, 0, .15)' },
+				{ from : 160, to : 220, color : 'rgba(255, 30,  0, .25)' }
+			],*/
+			highlights : false,
+			colors      : {
+				plate      : '#222',
+				majorTicks : '#f5f5f5',
+				minorTicks : '#ddd',
+				title      : '#fff',
+				units      : '#ccc',
+				numbers    : '#eee',
+				needle     : { start : 'rgba(240, 128, 128, 1)', end : 'rgba(255, 160, 122, .9)' }
+			}
+		});
+		gauge_l.draw();
+		gauge_r.draw();
+	</script>
+
+	<script type="text/javascript">
+		var dataSocket = new WebSocket("ws://127.0.0.1:8081/ws"); <!-- var dataSocket = new WebSocket("ws://172.23.33.148:8081/ws");-->
+
+
+		dataSocket.onopen = function(){
+        		console.log("connected");
+      		};
+
+		dataSocket.onmessage = function(evt) {
+			console.log(evt.data);
+			var msg = JSON.parse(evt.data);
+			var time = new Date().getTime()
+			range_r.append(time, parseFloat(msg.range_r));
+			range_f.append(time, parseFloat(msg.range_f));
+			bear.append(time, parseFloat(msg.bear));
+			//speed_r.append(new Date().getTime(), parseFloat(msg.speed_r));
+			//speed_l.append(new Date().getTime(), parseFloat(msg.speed_l));
+			distance_r.append(new Date().getTime(), parseFloat(msg.cur_dist_r));
+			distance_l.append(new Date().getTime(), parseFloat(msg.cur_dist_l));
+
+			document.getElementById("range_f").innerHTML = parseFloat(msg.range_f);
+			document.getElementById("range_r").innerHTML = parseFloat(msg.range_r);
+			document.getElementById("Compass").innerHTML = parseFloat(msg.bear);
+			document.getElementById("ir1").innerHTML = parseFloat(msg.infrared);
+			document.getElementById("parkinglot").innerHTML = parseFloat(msg.parkinglot);
+			document.getElementById("parkingtime").innerHTML = parseFloat(msg.parkingtime);
+			document.getElementById("parkingdistance").innerHTML = parseFloat(msg.parkingdistance);
+
+			switch (parseFloat(msg.infrared_led)) {
+				case "-1":
+					document.getElementById("infrared").src="";
+					break;
+
+				case 0:
+					document.getElementById("infrared").src="led_off.png";
+					break;
+
+				case 1:
+					document.getElementById("infrared").src="led_on.png";
+					break;
+			}
+			//document.getElementById("speed_l").innerHTML = parseFloat(msg.speed_l);
+			//document.getElementById("speed_r").innerHTML = parseFloat(msg.speed_r);
+			document.getElementById("distance_l").innerHTML = parseFloat(msg.cur_dist_l);
+			document.getElementById("distance_r").innerHTML = parseFloat(msg.cur_dist_r);
+			gauge_l.setValue( parseFloat(msg.speed_l));
+			gauge_r.setValue( parseFloat(msg.speed_r));
+
+			if (parseFloat(msg.reload) == '1') {
+				document.getElementById("image").src="image.jpg?rand="+Math.random(); // Random number so that the cached image is not used
+			}
+
+		};
+
+		dataSocket.onclose = function(evt) {
+			console.log("disconnected");
+		};
+
+
+
+		// Delay fuer Zeichnen in SmoothieChart
+		var delay = 5
+
+
+		var range_Chart = new SmoothieChart({ minValue: 0, maxValue: 200, grid: { strokeStyle: 'rgb(125, 0, 0)',
+			fillStyle: 'rgb(80, 0.8, 0)', lineWidth: 1, millisPerLine: 250, verticalSections: 6 } });
+		range_Chart.streamTo(document.getElementById("range_Chart"), delay);
+
+		var range_r = new TimeSeries();
+		var range_f = new TimeSeries();
+		range_Chart.addTimeSeries(range_r,{ strokeStyle:'rgb(0, 255, 0)', fillStyle:'rgba(0, 255, 0, 0.4)', lineWidth:3 });
+		range_Chart.addTimeSeries(range_f,{ strokeStyle:'rgb(255, 0, 0)', fillStyle:'rgba(255, 0, 0, 0.4)', lineWidth:3 });
+
+		var compass_Chart = new SmoothieChart({ minValue: 0, maxValue: 360, grid: { strokeStyle: 'rgb(125, 0, 125)',
+			fillStyle: 'rgb(80, 0.8,80)', lineWidth: 1, millisPerLine: 250, verticalSections: 6 } });
+		compass_Chart.streamTo(document.getElementById("compass_Chart"), delay);
+
+		var bear = new TimeSeries();
+		compass_Chart.addTimeSeries(bear, {lineWidth:3});
+
+		//var speed_Chart = new SmoothieChart({ grid: { strokeStyle: 'rgb(125, 125, 0)',
+		//	fillStyle: 'rgb(80, 0.8, 80)', lineWidth: 1, millisPerLine: 250, verticalSections: 6 } });
+		//speed_Chart.streamTo(document.getElementById("speed_Chart"), delay);
+
+		//var speed_r = new TimeSeries();
+		//speed_Chart.addTimeSeries(speed_r,{ strokeStyle:'rgb(0, 255, 0)', fillStyle:'rgba(0, 255, 0, 0.4)', lineWidth:3 });
+        //var speed_l = new TimeSeries();
+		//speed_Chart.addTimeSeries(speed_l,{ strokeStyle:'rgb(255, 0, 0)', fillStyle:'rgba(255, 0, 0, 0.4)', lineWidth:3 });
+
+		var distance_Chart = new SmoothieChart({ grid: { strokeStyle: 'rgb(125, 125, 0)',
+			fillStyle: 'rgb(80, 0.8, 80)', lineWidth: 1, millisPerLine: 250, verticalSections: 6 } });
+		distance_Chart.streamTo(document.getElementById("distance_Chart"), delay);
+
+		var distance_r = new TimeSeries();
+		distance_Chart.addTimeSeries(distance_r,{ strokeStyle:'rgb(0, 255, 0)', fillStyle:'rgba(0, 255, 0, 0.4)', lineWidth:3 });
+        var distance_l = new TimeSeries();
+		distance_Chart.addTimeSeries(distance_l,{ strokeStyle:'rgb(255, 0, 0)', fillStyle:'rgba(255, 0, 0, 0.4)', lineWidth:3 });
+	</script>
+
+
+<img src="led_off.png" width=1><img src="led_on.png" width=1>
+  </body>
+</html>

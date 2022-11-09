@@ -1,0 +1,7 @@
+<routes>
+    <flow id="ego-0" begin="121" end="122" number="1" from="-47755711#2" to="-66071387#0" speedFactor="1.0" speedDev="0.2">
+        <stop parkingArea="pa-0" duration="1000"/>
+        <param key="parking.absfreespace.weight" value="0.5"/>
+        <param key="parking.distanceto.weight" value="0.5"/>
+    </flow>
+</routes>

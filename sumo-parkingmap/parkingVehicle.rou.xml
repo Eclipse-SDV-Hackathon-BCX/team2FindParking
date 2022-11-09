@@ -1,0 +1,22 @@
+<routes>
+    <!-- <flow id="parking-0" begin="0" end="1" number="4" from="-4.0.00" to="17.0.00" speedFactor="1.0" speedDev="0.2">
+        <stop parkingArea="pa-0" duration="1000"/>
+        <param key="parking.absfreespace.weight" value="0.5"/>
+        <param key="parking.distanceto.weight" value="0.5"/>
+    </flow>
+    <flow id="parked-1" begin="0" end="1" number="5" from="-4.0.00" to="17.0.00" speedFactor="1.0" speedDev="0.2">
+        <stop parkingArea="pa-1" duration="1000"/>
+        <param key="parking.absfreespace.weight" value="0.5"/>
+        <param key="parking.distanceto.weight" value="0.5"/>
+    </flow> -->
+    <flow id="parked-1" begin="0" end="1" number="4" from="4.0.00" to="22.0.00" speedFactor="1.0" speedDev="0.2">
+        <stop parkingArea="pa-1" duration="1000"/>
+        <param key="parking.absfreespace.weight" value="0.5"/>
+        <param key="parking.distanceto.weight" value="0.5"/>
+    </flow>
+    <flow id="parked-2" begin="0" end="1" number="5" from="4.0.00" to="22.0.00" speedFactor="1.0" speedDev="0.2">
+        <stop parkingArea="pa-2" duration="1000"/>
+        <param key="parking.absfreespace.weight" value="0.5"/>
+        <param key="parking.distanceto.weight" value="0.5"/>
+    </flow>
+</routes>

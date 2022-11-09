@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- generated on 2022-11-08 14:53:55.131355 by generateParkingAreas.py UNKNOWN
+<configuration>
+    <net-file value="osm.net.xml"/>
+</configuration>
+
+-->
+<additional xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/additional_file.xsd">
+
+    <parkingArea id="pa-0" lane="-66071387#1_0" startPos="10" endPos="50" roadsideCapacity="4" length="5"/>
+    <parkingArea id="pa-2" lane="-66071387#1_0" startPos="50" endPos="90" roadsideCapacity="4" length="5"/>
+    <parkingArea id="pa-4" lane="-66071387#1_0" startPos="90" endPos="100" roadsideCapacity="1" length="5"/>
+
+    <parkingArea id="pa-1" lane="66071387#1_0" startPos="10" endPos="50" roadsideCapacity="4" length="5"/>
+    <parkingArea id="pa-3" lane="66071387#1_0" startPos="50" endPos="100" roadsideCapacity="5" length="5"/>
+  
+
+</additional>
